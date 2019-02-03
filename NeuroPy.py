@@ -1,51 +1,10 @@
-##Copyright (c) 2013, sahil singh
-##
-##All rights reserved.
-##
-##Redistribution and use in source and binary forms, with or without modification,
-##are permitted provided that the following conditions are met:
-##
-##    * Redistributions of source code must retain the above copyright notice,
-##      this list of conditions and the following disclaimer.
-##    * Redistributions in binary form must reproduce the above copyright notice,
-##      this list of conditions and the following disclaimer in the documentation
-##      and/or other materials provided with the distribution.
-##    * Neither the name of NeuroPy nor the names of its contributors
-##      may be used to endorse or promote products derived from this software
-##      without specific prior written permission.
-##
-##THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-##"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-##LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-##A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-##CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-##EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-##PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-##PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-##LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-##NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-##SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 import serial
 import _thread as thread
 import base64
-
+import binascii
+import numpy as np
+from pathlib import Path
 class NeuroPy(object):
-    """NeuroPy libraby, to get data from neurosky mindwave.
-    Initialising: object1=NeuroPy("COM6",57600) #windows
-    After initialising , if required the callbacks must be set
-    then using the start method the library will start fetching data from mindwave
-    i.e. object1.start()
-    similarly stop method can be called to stop fetching the data
-    i.e. object1.stop()
-
-    The data from the device can be obtained using either of the following methods or both of them together:
-    
-    Obtaining value: variable1=object1.attention #to get value of attention
-    #other variables: attention,meditation,rawValue,delta,theta,lowAlpha,highAlpha,lowBeta,highBeta,lowGamma,midGamma, poorSignal and blinkStrength
-    
-    Setting callback:a call back can be associated with all the above variables so that a function is called when the variable is updated. Syntax: setCallBack("variable",callback_function)
-    for eg. to set a callback for attention data the syntax will be setCallBack("attention",callback_function)"""
     __attention=0
     __meditation=0
     __rawValue=0
@@ -62,7 +21,7 @@ class NeuroPy(object):
     srl=None
     __port=None
     __baudRate=None
-    
+    __history = None
     threadRun=True #controlls the running of thread
     callBacksDictionary={} #keep a track of all callbacks
     def __init__(self,port,baudRate=9600):
@@ -107,7 +66,8 @@ class NeuroPy(object):
                        elif(code=='05'):#meditation
                            i=i+1; self.meditation=int(payload[i],16)
                        elif(code=='16'):#blink strength
-                           i=i+1; self.blinkStrength=int(payload[i],16)
+                            i=i+1; self.blinkStrength=int(payload[i],16)
+                            #  i=i+1; self.blinkStrength=int(1000)
                        elif(code=='80'):#raw value
                            i=i+1 #for length/it is not used since length =1 byte long and always=2
                            i=i+1; val0=int(payload[i],16)
@@ -148,6 +108,7 @@ class NeuroPy(object):
                            i=i+1; val0=int(payload[i],16)
                            i=i+1; val1=int(payload[i],16)
                            i=i+1; self.midGamma=val0*65536+val1*256+int(payload[i],16)
+                           self.updateHistory()
                        else:
                            pass
                        i=i+1
@@ -312,3 +273,28 @@ class NeuroPy(object):
         self.__blinkStrength=value
         if 'blinkStrength' in self.callBacksDictionary.keys(): #if callback has been set, execute the function
             self.callBacksDictionary["blinkStrength"](self.__blinkStrength)
+    # def on_blink(headset, blink_strength):
+    #     print("Blink detected. Strength: %s" % blink_strength)
+    #     headset.blink_handlers.append(on_blink)
+
+
+    '''Appends the most recent read values to a local array'''
+
+    def updateHistory(self):
+        if self.__history is None:  # create it
+            self.__history = np.array([[self.delta, self.theta, self.lowAlpha, self.highAlpha, self.lowBeta,
+                                        self.highBeta, self.lowGamma, self.midGamma,self.attention,self.meditation,
+                                        self.rawValue,self.blinkStrength]])
+        else:
+            self.__history=np.append(self.__history, [[self.delta, self.theta, self.lowAlpha, self.highAlpha, self.lowBeta,
+                                        self.highBeta, self.lowGamma, self.midGamma,self.attention,self.meditation,
+                                                       self.rawValue,self.blinkStrength]], axis=0)
+
+    '''Saves all read values to csv'''
+    a = 0
+    def save(self):
+        print('Saving data...')
+        p = Path('./records/kabikabi_bourbon_.csv')
+        with p.open('ab') as f:
+            np.savetxt(f,self.__history, delimiter="," ,fmt='%.3f')
+        print('Saved')
