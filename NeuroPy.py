@@ -283,7 +283,7 @@ class NeuroPy(object):
 
     '''Appends the most recent read values to a local array'''
     def setSavePath(self):
-        self.p = Path('./records/kabikabi_needles_.csv')
+        self.p = Path('./records/sanjana.csv')
         
         pass
     
