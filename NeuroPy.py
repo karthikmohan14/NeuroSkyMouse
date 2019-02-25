@@ -22,11 +22,13 @@ class NeuroPy(object):
     __port=None
     __baudRate=None
     __history = None
+    p = None
     threadRun=True #controlls the running of thread
     callBacksDictionary={} #keep a track of all callbacks
     def __init__(self,port,baudRate=9600):
         self.__port,self.__baudRate=port,baudRate
-        
+        self.setSavePath()
+        self.addFieldHeader()
     def __del__(self):
         self.srl.close()
     
@@ -280,7 +282,20 @@ class NeuroPy(object):
 
 
     '''Appends the most recent read values to a local array'''
-
+    def setSavePath(self):
+        self.p = Path('./records/kabikabi_needles_.csv')
+        
+        pass
+    
+    def addFieldHeader(self):
+        header = np.array([["delta", "theta", "lowAlpha", "highAlpha", "lowBeta",
+                                        "highBeta", "lowGamma", "midGamma","attention","meditation",
+                                        "rawValue","blinkStrength"]])
+        
+        with self.p.open('ab') as f:
+            np.savetxt(f,header, delimiter="," ,fmt='%s')
+        pass
+    
     def updateHistory(self):
         if self.__history is None:  # create it
             self.__history = np.array([[self.delta, self.theta, self.lowAlpha, self.highAlpha, self.lowBeta,
@@ -295,8 +310,7 @@ class NeuroPy(object):
     '''Saves all read values to csv'''
     a = 0
     def save(self):
-        print('Saving data...')
-        p = Path('./records/kabikabi_needles_.csv')
-        with p.open('ab') as f:
+        print('Saving data...')        
+        with self.p.open('ab') as f:
             np.savetxt(f,self.__history, delimiter="," ,fmt='%.3f')
         print('Saved')

@@ -1,0 +1,1 @@
+delta theta self.lowAlpha self.highAlpha self.lowBeta self.highBeta self.lowGamma self.midGamma self.attention self.meditation self.rawValue self.blinkStrength
