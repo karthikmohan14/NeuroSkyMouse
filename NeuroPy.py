@@ -109,6 +109,7 @@ class NeuroPy(object):
                            i=i+1; val1=int(payload[i],16)
                            i=i+1; self.midGamma=val0*65536+val1*256+int(payload[i],16)
                            self.updateHistory()
+                           self.__history = None
                        else:
                            pass
                        i=i+1
@@ -289,12 +290,13 @@ class NeuroPy(object):
             self.__history=np.append(self.__history, [[self.delta, self.theta, self.lowAlpha, self.highAlpha, self.lowBeta,
                                         self.highBeta, self.lowGamma, self.midGamma,self.attention,self.meditation,
                                                        self.rawValue,self.blinkStrength]], axis=0)
+        self.save()
 
     '''Saves all read values to csv'''
     a = 0
     def save(self):
         print('Saving data...')
-        p = Path('./records/kabikabi_bourbon_.csv')
+        p = Path('./records/kabikabi_needles_.csv')
         with p.open('ab') as f:
             np.savetxt(f,self.__history, delimiter="," ,fmt='%.3f')
         print('Saved')

@@ -1,0 +1,16 @@
+# for python 3.6.x
+PyTweening=1.0.3
+pyautogui=0.9.41
+pygetwindow=0.0.4
+pymsgbox=1.0.6
+pyrect=0.1.4
+pyscreeze=0.1.19
+future=0.17.1
+iso8601=0.1.12
+serial=0.0.97
+pywin32=224
+pyserial=3.4
+# _thread=
+# base64=
+# binascii=
+# pathlib=

@@ -58,6 +58,7 @@ while(True):
             pi.moveTo(map(ob.attention, 1, 100, 1, GetSystemMetrics(1))+1,y, pytweening.easeInQuad(0.5))
         else:
             pi.moveTo(map(ob.attention-2, 1, 100, 1, GetSystemMetrics(1))+1,y, pytweening.easeInQuad(0.5))
+    # ob.save()
     # print("alpha ",ob.highAlpha," ",ob.lowAlpha," Beta ",ob.highBeta," ",ob.lowBeta)
 ob.stop()
 ob.save()
