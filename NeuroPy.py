@@ -1,3 +1,4 @@
+# do not add entry if attention value is 0 
 import serial
 import _thread as thread
 import base64
