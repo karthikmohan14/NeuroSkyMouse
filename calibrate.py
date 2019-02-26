@@ -1,3 +1,9 @@
+# get data first as "__name__activity.csv" then create model based on it "__model__name.csv"
+# model built with mean squared error ,, change map values from 1 to 100 to min to max from the model
+# model ie "__model__name.csv" will store 3 vals "attention_min" "attention_max" "activity"
+
+# when calibrate is run , ask for name and activity
+
 # importing csv module 
 import csv 
 
